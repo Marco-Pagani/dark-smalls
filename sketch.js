@@ -1,6 +1,19 @@
+function preload() {
+  font = loadFont('assets/OptimusPrinceps.ttf')
+}
+
+function setup() {
+  const canvas = createCanvas(800, 800);
+  canvas.parent('game-wrapper')
+
+  textFont(font)
+  textSize(24)
+}
+
+
 const MOVES = ['SCISSORS', 'ROCK', 'PAPER']
 const levels = [
-  { attacks: 5, successMargin: 0.01, enemyName: 'AAAA Battery, The Lesser' },
+  { attacks: 1, successMargin: 0.3, enemyName: 'AAAA Battery, The Lesser' },
   { attacks: 1, successMargin: 0.3, enemyName: '2' },
   { attacks: 1, successMargin: 0.3, enemyName: '3' },
   { attacks: 2, successMargin: 0.25, enemyName: '4' },
@@ -12,35 +25,15 @@ const levels = [
   { attacks: 5, successMargin: 0.1, enemyName: '10' },
 ]
 
-let gameStatus = 0
-
-const gameState = {
-  level: -1,
-  health: 3
-}
-const levelState = {
-  startTime: null,
-
-}
-const roundState = {
-  startTime: null,
-  enemyAttacks: null,
-  currentAttack: 0
-}
-
-const attackState = {
-  startTime: null,
-  chargeProgress: 0,
-}
-
-function setup() {
-  const canvas = createCanvas(800, 800);
-  canvas.parent('game-wrapper')
-}
+let globalState = 0
+const gameState = { level: -1, health: 3 }
+const levelState = { startTime: null }
+const roundState = { startTime: null, enemyAttacks: null, currentAttack: 0 }
+const attackState = { startTime: null, chargeProgress: 0, }
 
 function draw() {
   background(240)
-  switch (gameStatus) {
+  switch (globalState) {
     case 0: updateGameState(); break
     case 1: updateLevelState(); break
     case 2: updateRoundState(); break
@@ -53,7 +46,7 @@ function draw() {
 function updateGameState() {
   text('click to start', 100, 100)
   if (mouseIsPressed) { // init round
-    gameStatus = 1
+    globalState = 1
     levelState.startTime = millis()
   }
 }
@@ -74,7 +67,7 @@ function updateLevelState() {
 
 
   if (time > 4000) {
-    gameStatus = 2
+    globalState = 2
     gameState.level = gameState.level + 1
     roundState.startTime = millis()
     roundState.enemyAttacks = new Array(levels[gameState.level].attacks).fill(0).map(e => Math.floor(Math.random() * 3))
@@ -86,7 +79,7 @@ function updateLevelState() {
 function updateRoundState() {
 
   if (roundState.currentAttack === roundState.enemyAttacks.length) {
-    gameStatus = 1
+    globalState = 1
     levelState.startTime = millis()
     return
   }
@@ -100,7 +93,7 @@ function updateRoundState() {
 
 
   if (time > 2000 || roundState.currentAttack > 0) {
-    gameStatus = 3
+    globalState = 3
     attackState.startTime = millis()
   }
 }
@@ -109,14 +102,14 @@ function updateAttackState() {
   drawAttackTarget()
   drawAttackBar()
   attackState.chargeProgress = (millis() - attackState.startTime) * 0.001
-  if (keyIsPressed && attackState.chargeProgress > 0.1) handleAttackInput()
+  if (keyIsPressed && attackState.chargeProgress > 0.3) handleAttackInput()
   if (attackState.chargeProgress > 1) {
     gameState.health = gameState.health - 1
     if (gameState.health === 0) {
-      gameStatus = 4
+      globalState = 4
       return
     }
-    gameStatus = 2
+    globalState = 2
     roundState.currentAttack = roundState.currentAttack + 1
     attackState.chargeProgress = 0
   }
@@ -134,11 +127,11 @@ function handleAttackInput() {
     if (!(successfulMove && successfulTiming)) {
       gameState.health = gameState.health - 1
       if (gameState.health === 0) {
-        gameStatus = 4
+        globalState = 4
         return
       }
     }
-    gameStatus = 2
+    globalState = 2
     roundState.currentAttack = roundState.currentAttack + 1
     attackState.chargeProgress = 0
   }
@@ -168,9 +161,10 @@ function drawGameOver() {
 }
 
 function drawDebug() {
-  text(JSON.stringify(gameState), 100, 600)
-  text(JSON.stringify(levelState), 100, 620)
-  text(JSON.stringify(roundState), 100, 640)
-  text(JSON.stringify(attackState), 100, 660)
-  text(gameStatus, 100, 680)
+  fill(0, 0, 0)
+  text(JSON.stringify(gameState), 20, 700)
+  text(JSON.stringify(levelState), 20, 720)
+  text(JSON.stringify(roundState), 20, 740)
+  text(JSON.stringify(attackState), 20, 760)
+  text(globalState, 20, 780)
 }
