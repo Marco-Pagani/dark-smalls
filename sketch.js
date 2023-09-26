@@ -1,6 +1,6 @@
 const MOVES = ['SCISSORS', 'ROCK', 'PAPER']
 const levels = [
-  { attacks: 1, successMargin: 0.3, enemyName: 'AAAA Battery, The Lesser' },
+  { attacks: 5, successMargin: 0.01, enemyName: 'AAAA Battery, The Lesser' },
   { attacks: 1, successMargin: 0.3, enemyName: '2' },
   { attacks: 1, successMargin: 0.3, enemyName: '3' },
   { attacks: 2, successMargin: 0.25, enemyName: '4' },
@@ -45,6 +45,7 @@ function draw() {
     case 1: updateLevelState(); break
     case 2: updateRoundState(); break
     case 3: updateAttackState(); break
+    case 4: drawGameOver(); break
   }
   drawDebug()
 }
@@ -58,6 +59,11 @@ function updateGameState() {
 }
 
 function updateLevelState() {
+  if (gameState.level === 9) {
+    gameState = 4
+    return
+  }
+
   const time = millis() - levelState.startTime
 
   text(`Level ${gameState.level + 1}`, 100, 100)
@@ -78,7 +84,7 @@ function updateLevelState() {
 }
 
 function updateRoundState() {
-  console.log(roundState.currentAttack, roundState.enemyAttacks.length)
+
   if (roundState.currentAttack === roundState.enemyAttacks.length) {
     gameStatus = 1
     levelState.startTime = millis()
@@ -93,7 +99,7 @@ function updateRoundState() {
 
 
 
-  if (time > 2000) {
+  if (time > 2000 || roundState.currentAttack > 0) {
     gameStatus = 3
     attackState.startTime = millis()
   }
@@ -103,7 +109,17 @@ function updateAttackState() {
   drawAttackTarget()
   drawAttackBar()
   attackState.chargeProgress = (millis() - attackState.startTime) * 0.001
-  if (keyIsPressed) handleAttackInput()
+  if (keyIsPressed && attackState.chargeProgress > 0.1) handleAttackInput()
+  if (attackState.chargeProgress > 1) {
+    gameState.health = gameState.health - 1
+    if (gameState.health === 0) {
+      gameStatus = 4
+      return
+    }
+    gameStatus = 2
+    roundState.currentAttack = roundState.currentAttack + 1
+    attackState.chargeProgress = 0
+  }
 }
 
 function handleAttackInput() {
@@ -118,7 +134,8 @@ function handleAttackInput() {
     if (!(successfulMove && successfulTiming)) {
       gameState.health = gameState.health - 1
       if (gameState.health === 0) {
-        // GAME OVER
+        gameStatus = 4
+        return
       }
     }
     gameStatus = 2
@@ -129,7 +146,8 @@ function handleAttackInput() {
 
 function drawAttackTarget() {
   fill(0, 0, 0)
-  text(MOVES[roundState.enemyAttacks[roundState.currentAttack]], 175, 175)
+  const moves = roundState.enemyAttacks.reduce((acc, atk) => acc + MOVES[atk] + ' ', '')
+  text(moves, 175, 175)
 }
 
 function drawAttackBar() {
@@ -145,9 +163,14 @@ function drawAttackBar() {
   line(linePos, 100, linePos, 150)
 }
 
+function drawGameOver() {
+  text(gameState.health ? 'win' : 'lose', 100, 100)
+}
+
 function drawDebug() {
   text(JSON.stringify(gameState), 100, 600)
   text(JSON.stringify(levelState), 100, 620)
   text(JSON.stringify(roundState), 100, 640)
   text(JSON.stringify(attackState), 100, 660)
+  text(gameStatus, 100, 680)
 }
