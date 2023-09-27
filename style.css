@@ -2,10 +2,21 @@ html,
 body {
   margin: 0;
   padding: 0;
+  background: rgb(200, 200, 200);
+  color: rgb(110, 20, 20);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 canvas {
   display: block !important;
   width: 80vw !important;
-  height: 80vw !important;
+  height: 100vw !important;
+  max-width: 800px;
+  max-height: 1000px;
+}
+
+#game-wrapper {
+  filter: drop-shadow(0px 0px 37px);
 }

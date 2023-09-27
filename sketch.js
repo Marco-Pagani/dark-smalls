@@ -2,9 +2,13 @@ function preload() {
   font = loadFont('assets/OptimusPrinceps.ttf')
 }
 
+let enemySprites
+
 function setup() {
-  const canvas = createCanvas(800, 800);
+  const canvas = createCanvas(800, 1000);
   canvas.parent('game-wrapper')
+
+  enemySprites = new Array(10).fill(0).map((_, i) => loadImage(`assets/images/${i + 1}.png`))
 
   textFont(font)
   textSize(24)
@@ -13,16 +17,16 @@ function setup() {
 
 const MOVES = ['SCISSORS', 'ROCK', 'PAPER']
 const levels = [
-  { attacks: 1, successMargin: 0.3, enemyName: 'AAAA Battery, The Lesser' },
-  { attacks: 1, successMargin: 0.3, enemyName: '2' },
-  { attacks: 1, successMargin: 0.3, enemyName: '3' },
-  { attacks: 2, successMargin: 0.25, enemyName: '4' },
-  { attacks: 2, successMargin: 0.25, enemyName: '5' },
-  { attacks: 2, successMargin: 0.25, enemyName: '6' },
-  { attacks: 3, successMargin: 0.2, enemyName: '7' },
-  { attacks: 3, successMargin: 0.15, enemyName: '8' },
-  { attacks: 4, successMargin: 0.15, enemyName: '9' },
-  { attacks: 5, successMargin: 0.1, enemyName: '10' },
+  { attacks: 1, successMargin: 0.3, enemyName: 'AAAA, The Lesser' },
+  { attacks: 1, successMargin: 0.3, enemyName: 'Macaroni of the Cupboard' },
+  { attacks: 1, successMargin: 0.3, enemyName: 'Soothesayer Ibuprofen' },
+  { attacks: 2, successMargin: 0.25, enemyName: 'The Lost Airpod' },
+  { attacks: 2, successMargin: 0.25, enemyName: 'Havel the Pebble' },
+  { attacks: 2, successMargin: 0.25, enemyName: 'Loathesome Ant' },
+  { attacks: 3, successMargin: 0.2, enemyName: 'Beano The Everroasted' },
+  { attacks: 3, successMargin: 0.15, enemyName: 'The Downtrodden Brick' },
+  { attacks: 4, successMargin: 0.15, enemyName: 'Archworm Moe' },
+  { attacks: 5, successMargin: 0.1, enemyName: 'The Coin Brothers' },
 ]
 
 let globalState = 0
@@ -32,7 +36,7 @@ const roundState = { startTime: null, enemyAttacks: null, currentAttack: 0 }
 const attackState = { startTime: null, chargeProgress: 0, }
 
 function draw() {
-  background(240)
+  background(210, 210, 210)
   switch (globalState) {
     case 0: updateGameState(); break
     case 1: updateLevelState(); break
@@ -62,6 +66,7 @@ function updateLevelState() {
   text(`Level ${gameState.level + 1}`, 100, 100)
 
   if (time > 2000) {
+    image(enemySprites[gameState.level + 1], 100, 200)
     text(levels[gameState.level + 1].enemyName, 200, 200)
   }
 
@@ -162,9 +167,9 @@ function drawGameOver() {
 
 function drawDebug() {
   fill(0, 0, 0)
-  text(JSON.stringify(gameState), 20, 700)
-  text(JSON.stringify(levelState), 20, 720)
-  text(JSON.stringify(roundState), 20, 740)
-  text(JSON.stringify(attackState), 20, 760)
-  text(globalState, 20, 780)
+  text(JSON.stringify(gameState), 20, 900)
+  text(JSON.stringify(levelState), 20, 920)
+  text(JSON.stringify(roundState), 20, 940)
+  text(JSON.stringify(attackState), 20, 960)
+  text(globalState, 20, 980)
 }
