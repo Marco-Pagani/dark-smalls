@@ -3,6 +3,8 @@ function preload() {
 }
 
 let enemySprites
+let attackSprites = []
+let controls
 
 function setup() {
   const canvas = createCanvas(800, 1000);
@@ -10,7 +12,15 @@ function setup() {
 
   enemySprites = new Array(10).fill(0).map((_, i) => loadImage(`assets/images/${i + 1}.png`))
 
+  controls = loadImage('assets/images/controls.png')
+
+  attackSprites.push(loadImage('assets/images/scissors.png'))
+  attackSprites.push(loadImage('assets/images/rock.png'))
+  attackSprites.push(loadImage('assets/images/paper.png'))
+
   textFont(font)
+  textAlign(CENTER);
+
   textSize(24)
 }
 
@@ -30,13 +40,14 @@ const levels = [
 ]
 
 let globalState = 0
-const gameState = { level: -1, health: 3 }
+const gameState = { level: 0, health: 3 }
 const levelState = { startTime: null }
 const roundState = { startTime: null, enemyAttacks: null, currentAttack: 0 }
 const attackState = { startTime: null, chargeProgress: 0, }
 
 function draw() {
   background(210, 210, 210)
+  image(controls, 400, 890)
   switch (globalState) {
     case 0: updateGameState(); break
     case 1: updateLevelState(); break
@@ -44,11 +55,17 @@ function draw() {
     case 3: updateAttackState(); break
     case 4: drawGameOver(); break
   }
-  drawDebug()
+  // drawDebug()
 }
 
 function updateGameState() {
-  text('click to start', 100, 100)
+  textSize(72)
+  fill(110, 20, 20)
+  text('DARK SMALLS', 400, 150)
+  textSize(28)
+  fill(0, 0, 0)
+  text('click to start', 400, 500)
+  imageMode(CENTER)
   if (mouseIsPressed) { // init round
     globalState = 1
     levelState.startTime = millis()
@@ -56,6 +73,7 @@ function updateGameState() {
 }
 
 function updateLevelState() {
+  text(`health: ${gameState.health}`, 100, 950)
   if (gameState.level === 9) {
     gameState = 4
     return
@@ -63,17 +81,17 @@ function updateLevelState() {
 
   const time = millis() - levelState.startTime
 
-  text(`Level ${gameState.level + 1}`, 100, 100)
+  textSize(36)
+  fill(110, 20, 20)
+  text(`Level ${gameState.level + 1}`, 400, 100)
 
   if (time > 2000) {
-    image(enemySprites[gameState.level + 1], 100, 200)
-    text(levels[gameState.level + 1].enemyName, 200, 200)
+    drawEnemy()
   }
 
 
   if (time > 4000) {
     globalState = 2
-    gameState.level = gameState.level + 1
     roundState.startTime = millis()
     roundState.enemyAttacks = new Array(levels[gameState.level].attacks).fill(0).map(e => Math.floor(Math.random() * 3))
     roundState.currentAttack = 0
@@ -85,12 +103,14 @@ function updateRoundState() {
 
   if (roundState.currentAttack === roundState.enemyAttacks.length) {
     globalState = 1
+    gameState.level = gameState.level + 1
     levelState.startTime = millis()
     return
   }
 
   const time = millis() - roundState.startTime
 
+  drawEnemy()
   drawAttackTarget()
 
   if (time > 1000) drawAttackBar()
@@ -104,6 +124,7 @@ function updateRoundState() {
 }
 
 function updateAttackState() {
+  drawEnemy()
   drawAttackTarget()
   drawAttackBar()
   attackState.chargeProgress = (millis() - attackState.startTime) * 0.001
@@ -142,34 +163,51 @@ function handleAttackInput() {
   }
 }
 
+function drawEnemy() {
+  image(enemySprites[gameState.level], 400, 450, 500, 500)
+  textSize(42)
+  fill(110, 20, 20)
+  text(levels[gameState.level].enemyName, 400, 750)
+}
+
 function drawAttackTarget() {
-  fill(0, 0, 0)
-  const moves = roundState.enemyAttacks.reduce((acc, atk) => acc + MOVES[atk] + ' ', '')
-  text(moves, 175, 175)
+  strokeWeight(0)
+  fill(240, 240, 240)
+  //rect(100, 180, 700, 100)
+  fill(180, 50, 50)
+  textSize(20)
+  text('parry this ->', 280, 140)
+  roundState.enemyAttacks.forEach((atk, i) => image(attackSprites[atk], 400 + (100 * i), 130, 40, 40))
 }
 
 function drawAttackBar() {
   rectMode(CORNERS)
   strokeWeight(0)
   fill(180, 50, 50)
-  rect(100, 100, 700, 150)
+  rect(100, 50, 700, 100)
   const successZoneX = 700 - (levels[gameState.level].successMargin * 600)
   fill(50, 180, 50)
-  rect(successZoneX, 100, 700, 150)
+  rect(successZoneX, 50, 700, 100)
   strokeWeight(5)
   const linePos = 100 + attackState.chargeProgress * 600
-  line(linePos, 100, linePos, 150)
+  line(linePos, 50, linePos, 100)
 }
 
 function drawGameOver() {
-  text(gameState.health ? 'win' : 'lose', 100, 100)
+
+  if (gameState.health) fill(50, 180, 50)
+  else fill(180, 50, 50)
+  textSize(60)
+  text(gameState.health ? 'lord of smallness felled' : 'YOU DIED', 400, 400)
 }
 
 function drawDebug() {
+  textAlign(LEFT)
   fill(0, 0, 0)
   text(JSON.stringify(gameState), 20, 900)
   text(JSON.stringify(levelState), 20, 920)
   text(JSON.stringify(roundState), 20, 940)
   text(JSON.stringify(attackState), 20, 960)
   text(globalState, 20, 980)
+  textAlign(CENTER)
 }

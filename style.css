@@ -17,6 +17,13 @@ canvas {
   max-height: 1000px;
 }
 
+p {
+  padding-left: 12vw;
+  padding-right: 12vw;
+  align-self: flex-start;
+}
+
 #game-wrapper {
+  padding-top: 50px;
   filter: drop-shadow(0px 0px 37px);
 }
