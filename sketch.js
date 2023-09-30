@@ -74,8 +74,8 @@ function updateGameState() {
 
 function updateLevelState() {
   text(`health: ${gameState.health}`, 100, 950)
-  if (gameState.level === 9) {
-    gameState = 4
+  if (gameState.level === 10) {
+    globalState = 4
     return
   }
 
@@ -111,10 +111,13 @@ function updateRoundState() {
   const time = millis() - roundState.startTime
 
   drawEnemy()
-  drawAttackTarget()
+  if (gameState.level < 5) drawAttackTarget()
+  else drawAttackBar()
 
-  if (time > 1000) drawAttackBar()
-
+  if (time > 1000) {
+    if (gameState.level < 5) drawAttackBar()
+    else drawAttackTarget()
+  }
 
 
   if (time > 2000 || roundState.currentAttack > 0) {
@@ -177,7 +180,10 @@ function drawAttackTarget() {
   fill(180, 50, 50)
   textSize(20)
   text('parry this ->', 280, 140)
-  roundState.enemyAttacks.forEach((atk, i) => image(attackSprites[atk], 400 + (100 * i), 130, 40, 40))
+  roundState.enemyAttacks.forEach((atk, i) => {
+    if (i > roundState.currentAttack + 1) return
+    image(attackSprites[atk], 400 + (80 * i), 130, 40, 40)
+  })
 }
 
 function drawAttackBar() {
