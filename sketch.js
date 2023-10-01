@@ -1,5 +1,11 @@
+let music, hitSound, missSound, beatSound
 function preload() {
   font = loadFont('assets/OptimusPrinceps.ttf')
+  soundFormats('mp3')
+  music = loadSound('assets/sounds/12ToccataAndFugueInDMinor.mp3')
+  hitSound = loadSound('assets/sounds/hit.mp3')
+  missSound = loadSound('assets/sounds/miss.mp3')
+  beatSound = loadSound('assets/sounds/beat.mp3')
 }
 
 let enemySprites
@@ -20,8 +26,8 @@ function setup() {
 
   textFont(font)
   textAlign(CENTER);
-
   textSize(24)
+
 }
 
 
@@ -67,11 +73,13 @@ function updateGameState() {
   text('click to start', 400, 500)
   imageMode(CENTER)
   if (mouseIsPressed) { // init round
+    music.play()
     globalState = 1
     levelState.startTime = millis()
   }
 }
 
+let beatTime
 function updateLevelState() {
   text(`health: ${gameState.health}`, 100, 950)
   if (gameState.level === 10) {
@@ -79,12 +87,16 @@ function updateLevelState() {
     return
   }
 
+  if (!beatTime || ((millis() - beatTime) > 1900)) {
+    beatTime = millis()
+    beatSound.play()
+  }
+
   const time = millis() - levelState.startTime
 
   textSize(36)
   fill(110, 20, 20)
   text(`Level ${gameState.level + 1}`, 400, 100)
-
   if (time > 2000) {
     drawEnemy()
   }
@@ -132,7 +144,8 @@ function updateAttackState() {
   drawAttackBar()
   attackState.chargeProgress = (millis() - attackState.startTime) * 0.001
   if (keyIsPressed && attackState.chargeProgress > 0.3) handleAttackInput()
-  if (attackState.chargeProgress > 1) {
+  else if (attackState.chargeProgress > 1) {
+    missSound.play()
     gameState.health = gameState.health - 1
     if (gameState.health === 0) {
       globalState = 4
@@ -154,12 +167,14 @@ function handleAttackInput() {
     const successfulMove = chosenMove === roundState.enemyAttacks[roundState.currentAttack]
     const successfulTiming = attackState.chargeProgress < 1 && attackState.chargeProgress > (1 - levels[gameState.level].successMargin)
     if (!(successfulMove && successfulTiming)) {
+      missSound.play()
       gameState.health = gameState.health - 1
       if (gameState.health === 0) {
         globalState = 4
         return
       }
     }
+    else hitSound.play()
     globalState = 2
     roundState.currentAttack = roundState.currentAttack + 1
     attackState.chargeProgress = 0
@@ -181,8 +196,8 @@ function drawAttackTarget() {
   textSize(20)
   text('parry this ->', 280, 140)
   roundState.enemyAttacks.forEach((atk, i) => {
-    if (i > roundState.currentAttack + 1) return
-    image(attackSprites[atk], 400 + (80 * i), 130, 40, 40)
+    if (i < roundState.currentAttack || i > roundState.currentAttack + 1) return
+    image(attackSprites[atk], 400 + (60 * (i - roundState.currentAttack)), 130, 40, 40)
   })
 }
 
@@ -201,14 +216,15 @@ function drawAttackBar() {
 
 function drawGameOver() {
 
-  if (gameState.health) fill(50, 180, 50)
+  if (gameState.health > 1) fill(50, 180, 50)
   else fill(180, 50, 50)
   textSize(60)
-  text(gameState.health ? 'lord of smallness felled' : 'YOU DIED', 400, 400)
+  text((gameState.health > 1) ? 'lord of smallness felled' : 'YOU DIED', 400, 400)
 }
 
 function drawDebug() {
   textAlign(LEFT)
+  textSize(18)
   fill(0, 0, 0)
   text(JSON.stringify(gameState), 20, 900)
   text(JSON.stringify(levelState), 20, 920)
