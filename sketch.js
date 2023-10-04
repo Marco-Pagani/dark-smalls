@@ -12,6 +12,10 @@ let enemySprites
 let attackSprites = []
 let controls
 
+function keyPressed() {
+  if (keyCode === UP_ARROW) return false
+}
+
 function setup() {
   const canvas = createCanvas(800, 1000);
   canvas.parent('game-wrapper')
@@ -33,16 +37,16 @@ function setup() {
 
 const MOVES = ['SCISSORS', 'ROCK', 'PAPER']
 const levels = [
-  { attacks: 1, successMargin: 0.3, enemyName: 'AAAA, The Lesser' },
-  { attacks: 1, successMargin: 0.3, enemyName: 'Macaroni of the Cupboard' },
-  { attacks: 1, successMargin: 0.3, enemyName: 'Soothesayer Ibuprofen' },
-  { attacks: 2, successMargin: 0.25, enemyName: 'The Lost Airpod' },
-  { attacks: 2, successMargin: 0.25, enemyName: 'Havel the Pebble' },
-  { attacks: 2, successMargin: 0.25, enemyName: 'Loathesome Ant' },
-  { attacks: 3, successMargin: 0.2, enemyName: 'Beano The Everroasted' },
-  { attacks: 3, successMargin: 0.15, enemyName: 'The Downtrodden Brick' },
-  { attacks: 4, successMargin: 0.15, enemyName: 'Archworm Moe' },
-  { attacks: 5, successMargin: 0.1, enemyName: 'The Coin Brothers' },
+  { attacks: 1, successMargin: 0.25, enemyName: 'AAAA, The Lesser' },
+  { attacks: 1, successMargin: 0.23, enemyName: 'Macaroni of the Cupboard' },
+  { attacks: 1, successMargin: 0.21, enemyName: 'Soothesayer Ibuprofen' },
+  { attacks: 2, successMargin: 0.20, enemyName: 'The Lost Airpod' },
+  { attacks: 2, successMargin: 0.19, enemyName: 'Havel the Pebble' },
+  { attacks: 2, successMargin: 0.17, enemyName: 'Loathesome Ant' },
+  { attacks: 3, successMargin: 0.15, enemyName: 'Beano The Everroasted' },
+  { attacks: 3, successMargin: 0.12, enemyName: 'The Downtrodden Brick' },
+  { attacks: 4, successMargin: 0.11, enemyName: 'Archworm Moe' },
+  { attacks: 5, successMargin: 0.10, enemyName: 'The Coin Brothers' },
 ]
 
 let globalState = 0
