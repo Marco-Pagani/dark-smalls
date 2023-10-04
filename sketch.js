@@ -100,7 +100,9 @@ function updateLevelState() {
 
   textSize(36)
   fill(110, 20, 20)
-  text(`Level ${gameState.level + 1}`, 400, 100)
+  if (gameState.level === 4) text('mid boss', 400, 100)
+  else if (gameState.level === 9) text('final boss', 400, 100)
+  else text(`Level ${gameState.level + 1}`, 400, 100)
   if (time > 2000) {
     drawEnemy()
   }
